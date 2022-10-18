@@ -27,7 +27,8 @@ lazy val root = (project in file("."))
       "dev.zio" %% "zio-test-junit" % zioVersion % Test,
       "dev.zio" %% "zio-mock" % zioMockVersion % Test,
       "dev.zio" %% "zio-test-magnolia" % zioVersion % Test,
-      "org.ow2.asm" % "asm" % "9.4"
+      "org.ow2.asm" % "asm" % "9.4",
+      "org.ow2.asm" % "asm-tree" % "9.4",
     ),
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
   )
