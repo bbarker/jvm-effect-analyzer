@@ -8,10 +8,13 @@ lazy val root = (project in file("."))
   .settings(
     inThisBuild(
       List(
-        name := "scala-effect-analyzer",
+        // name := "scala-effect-analyzer",
         organization := "io.github.bbarker.eff.analyzer",
         version := "0.0.1",
         scalaVersion := "3.1.3",
+        semanticdbEnabled := true,
+        semanticdbVersion := scalafixSemanticdb.revision,
+        scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
       )
     ),
     name := "zio-quickstart",
@@ -28,8 +31,8 @@ lazy val root = (project in file("."))
       "dev.zio" %% "zio-mock" % zioMockVersion % Test,
       "dev.zio" %% "zio-test-magnolia" % zioVersion % Test,
       "org.ow2.asm" % "asm" % "9.4",
-      "org.ow2.asm" % "asm-tree" % "9.4",
+      "org.ow2.asm" % "asm-tree" % "9.4"
     ),
-    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
+    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
   )
   .enablePlugins(JavaAppPackaging)

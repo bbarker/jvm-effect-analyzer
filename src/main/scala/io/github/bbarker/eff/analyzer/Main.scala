@@ -1,15 +1,13 @@
 package io.github.bbarker.eff.analyzer
 
+import scala.jdk.CollectionConverters.*
 
+import io.github.bbarker.eff.analyzer.config.Configuration.*
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.tree.*
 import zio.*
 import zio.config.*
 import zio.stream.*
-import io.github.bbarker.eff.analyzer.config.Configuration.*
-
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.tree.*
-
-import scala.jdk.CollectionConverters.*
 
 object Main extends ZIOAppDefault:
 
@@ -21,10 +19,12 @@ object Main extends ZIOAppDefault:
 
   val cn = new ClassNode
   val testClassName = "io/github/bbarker/eff/analyzer/Main$FooBar"
-  def asmClassPath(className: String): String = className.replace('.', '/') + ".class"
+  def asmClassPath(className: String): String =
+    className.replace('.', '/') + ".class"
   println(s"testClassPath = ${asmClassPath(testClassName)}")
 
-  val testClassStream = this.getClass.getClassLoader.getResourceAsStream(asmClassPath(testClassName))
+  val testClassStream = this.getClass.getClassLoader
+    .getResourceAsStream(asmClassPath(testClassName))
 
   val myReader = new ClassReader(testClassStream) {}
 
@@ -33,11 +33,11 @@ object Main extends ZIOAppDefault:
   println(s"methods: ${cn.methods.asScala.map(_.name)}")
   println(s"fields: ${cn.fields.asScala.map(_.name)}")
 
-  val program = 
+  val program =
     for
       config <- getConfig[ServerConfig]
-      _      <- Console.printLine(config)
+      _ <- Console.printLine(config)
     yield ()
 
-  override val run = 
+  override val run =
     program.provide(ServerConfig.layer)

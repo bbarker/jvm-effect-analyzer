@@ -1,12 +1,12 @@
 package io.github.bbarker.eff.analyzer.config
 
 import com.typesafe.config.ConfigFactory
-import zio.*
-import zio.config.*
-import zio.config.ConfigSource.*
-import zio.config.ConfigDescriptor.*
-import zio.config.typesafe.TypesafeConfigSource
 import io.github.bbarker.eff.analyzer.config.Configuration.ServerConfig
+import zio.*
+import zio.config.ConfigDescriptor.*
+import zio.config.ConfigSource.*
+import zio.config.*
+import zio.config.typesafe.TypesafeConfigSource
 
 object Configuration:
 

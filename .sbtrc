@@ -1,0 +1,3 @@
+alias fmt = ; scalafixAll ; scalafmtAll ; scalafmtSbt 
+alias fmtcheck = ; scalafixAll --check ; scalafmtCheckAll ; scalafmtSbtCheck
+alias fmtcheckCicd = ; project bonus-service-perf-tests ; clean ; Test / compile ; fmtcheck
