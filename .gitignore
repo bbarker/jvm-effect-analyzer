@@ -4,8 +4,10 @@
 target/
 project/project/
 project/target/
+project/metals.sbt
 logs/
 .bsp/
 .bloop/
 .metals/
 .vscode/
+.idea/

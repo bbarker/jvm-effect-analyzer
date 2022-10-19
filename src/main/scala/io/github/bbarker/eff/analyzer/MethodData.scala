@@ -2,13 +2,11 @@ package io.github.bbarker.eff.analyzer
 
 import scala.jdk.CollectionConverters.*
 
-import io.github.bbarker.eff.analyzer.config.Configuration.*
-import org.objectweb.asm.ClassReader
+import org.objectweb.asm.*
 import org.objectweb.asm.tree.*
 import zio.*
 import zio.config.*
 import zio.stream.*
-import org.objectweb.asm.*
 
 /*
 Page 118:
