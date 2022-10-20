@@ -5,12 +5,12 @@ import scala.annotation.{tailrec, targetName}
 import io.github.bbarker.eff.analyzer.util.Errors
 import org.objectweb.asm.*
 import org.objectweb.asm.tree.*
-import org.objectweb.asm.tree.analysis._
+import org.objectweb.asm.tree.analysis.*
 import zio.*
 import zio.config.*
 import zio.stream.*
 
-class ControlFlowGraph {
+object ControlFlowGraph {
 
   def analyzer(): Analyzer[BasicValue] = new Analyzer(new BasicInterpreter()) {
 

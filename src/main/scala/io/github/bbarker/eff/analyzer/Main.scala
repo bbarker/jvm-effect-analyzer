@@ -3,6 +3,7 @@ package io.github.bbarker.eff.analyzer
 import scala.jdk.CollectionConverters.*
 
 import io.github.bbarker.eff.analyzer.config.Configuration.*
+import io.github.bbarker.eff.analyzer.util.ClassPath.asmClassPath
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.*
 import zio.*
@@ -19,8 +20,7 @@ object Main extends ZIOAppDefault:
 
   val cn = new ClassNode
   val testClassName = "io/github/bbarker/eff/analyzer/Main$FooBar"
-  def asmClassPath(className: String): String =
-    className.replace('.', '/') + ".class"
+
   println(s"testClassPath = ${asmClassPath(testClassName)}")
 
   val testClassStream = this.getClass.getClassLoader
