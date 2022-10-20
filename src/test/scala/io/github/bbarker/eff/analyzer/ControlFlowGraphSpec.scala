@@ -1,5 +1,7 @@
 package io.github.bbarker.eff.analyzer
 
+import scala.jdk.CollectionConverters.*
+
 import io.github.bbarker.eff.analyzer.util.ClassPath.asmClassPath
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.*
@@ -20,13 +22,18 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
     .getResourceAsStream(asmClassPath(cycloTestClassPath))
 
   def spec = suite("ControlFlowGraphSpec")(
-    suite("simple check")(
-      test("???") {
+    suite("Cyclomatic Complexity")(
+      test("Testing basic conditionals (if-else branching)") {
         for {
           classNode <- ZIO.succeed(new ClassNode)
-          // cc <- ControlFlowGraph.cyclomaticComplexity(1, 2)
+          classReader <- ZIO.attempt(new ClassReader(cycloTestClassStream) {})
+          _ <- ZIO.succeed(classReader.accept(classNode, 0))
+          mNodes = classNode.methods.asScala
+          _ <- ZIO.succeed(mNodes.map(mn => mn.name)).debug
 
-        } yield assertTrue(1 + 1 == 2)
+          oneCC <- ControlFlowGraph.cyclomaticComplexity(classNode, "one")
+
+        } yield assertTrue(oneCC == Some(1))
       }
     )
   )
