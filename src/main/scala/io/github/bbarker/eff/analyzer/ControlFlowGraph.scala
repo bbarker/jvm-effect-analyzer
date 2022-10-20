@@ -20,10 +20,10 @@ object ControlFlowGraph {
         nStack: Int
     ): Frame[BasicValue] = Node(nLocals, nStack)
 
-    @targetName("newFrameCG")
-    protected def newFrame(
-        frame: Frame[BasicValue]
-    ): Frame[BasicValue] = Node.fromFrame[BasicValue](frame)
+    override protected def newFrame(
+        frame: Frame[? <: BasicValue]
+    ): Frame[BasicValue] =
+      Node.fromFrame[BasicValue](frame.asInstanceOf[Frame[BasicValue]])
 
     override protected def newControlFlowEdge(src: Int, dst: Int): Unit = {
       val srcFrame: Node[BasicValue] =

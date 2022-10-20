@@ -32,8 +32,12 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
           _ <- ZIO.succeed(mNodes.map(mn => mn.name)).debug
 
           oneCC <- ControlFlowGraph.cyclomaticComplexity(classNode, "one")
+          twoCC <- ControlFlowGraph.cyclomaticComplexity(classNode, "two")
+          threeCC <- ControlFlowGraph.cyclomaticComplexity(classNode, "three")
 
-        } yield assertTrue(oneCC == Some(1))
+        } yield assertTrue(oneCC == Some(1)) && assertTrue(
+          twoCC == Some(2)
+        ) && assertTrue(threeCC == Some(3))
       }
     )
   )
