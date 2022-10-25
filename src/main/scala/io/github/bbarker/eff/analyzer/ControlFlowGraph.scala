@@ -54,6 +54,9 @@ object ControlFlowGraph {
   def calculateCyclomaticComplexity(frames: Array[Node[BasicValue]]): Int = {
     @tailrec
     def go(edges: Int, nodes: Int, frameIx: Int): Int =
+      println(
+        s"edges: $edges, nodes: $nodes, frameIx: $frameIx"
+      ) // FIXME: DEBUG
       if (frameIx == frames.length) {
         edges - nodes + 2
       } else if (frames(frameIx) == null) {
