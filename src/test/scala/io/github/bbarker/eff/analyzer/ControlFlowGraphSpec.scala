@@ -11,26 +11,21 @@ import zio.test.*
 
 object ControlFlowGraphSpec extends ZIOSpecDefault:
 
-  /** Nodes correspond to frames (i.e. method calls), so we need each branch to
-    * call a method if we wish to count that as a node.
-    */
-  class SingleFrameMethods:
-    def one(x: Int): Int = x
-    def two(x: Int): Boolean = if (x < 0) then true else false
-    def three(x: Int): Boolean =
-      if (x < 0) then true else if (x == 1) then true else false
-
-  final case class TestClassInfo(
+  final case class TestClassInfo private (
       stream: InputStream,
       path: String,
       expectedCC: Map[String, Int]
-  ) {
+  ):
     val name: String = path.split(Array('$', '/')).last
-  }
-  val singleFrameMethodsPath =
-    "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$SingleFrameMethods"
-  val singleFrameMethodsStream = this.getClass.getClassLoader
-    .getResourceAsStream(asmClassPath(singleFrameMethodsPath))
+
+  object TestClassInfo:
+    def apply(path: String, expectedCC: Map[String, Int]): TestClassInfo =
+      TestClassInfo(
+        stream =
+          this.getClass.getClassLoader.getResourceAsStream(asmClassPath(path)),
+        path = path,
+        expectedCC = expectedCC
+      )
 
   def ccTripleTest(
       info: TestClassInfo
@@ -56,27 +51,43 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
       } yield assertTrue(
         ccOptMap == expectedCCMap
       )
-
     }
+
+  /** Nodes correspond to frames (i.e. method calls), so we need each branch to
+    * call a method if we wish to count that as a node.
+    */
+  class SingleFrameMethods:
+    def one(x: Int): Int = x
+    def two(x: Int): Boolean = if (x < 0) then true else false
+    def three(x: Int): Boolean =
+      if (x < 0) then true else if (x == 1) then true else false
+
+  class MethodOnBranch:
+    def one(x: Int): Int = x
+    def two(x: Int): Boolean = if (x < 0) then aux1(x) else aux2(x)
+    def three(x: Int): Boolean =
+      if (x < 0) then aux1(x) else if (x == 1) then aux2(x) else aux3(2)
+    def four(x: Int): Boolean =
+      if (x < 0) then aux1(x) else if (x == 1) then aux1(x) else aux1(2)
+
+    def aux1(x: Int): Boolean = if (x > 10) true else false
+    def aux2(x: Int): Boolean = if (x > 20) true else false
+    def aux3(x: Int): Boolean = if (x > 30) true else false
+
+  val singleFrameMethodsInfo: TestClassInfo =
+    TestClassInfo(
+      "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$SingleFrameMethods",
+      Map("one" -> 1, "two" -> 1, "three" -> 1)
+    )
+
+  val methodOnBranchInfo: TestClassInfo =
+    TestClassInfo(
+      "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$MethodOnBranch",
+      Map("one" -> 1, "two" -> 2, "three" -> 3, "four" -> 3)
+    )
   def spec = suite("ControlFlowGraphSpec")(
     suite("Cyclomatic Complexity")(
-      test("Testing basic conditionals (if-else branching)") {
-        for {
-          classNode <- ZIO.succeed(new ClassNode)
-          classReader <- ZIO.attempt(
-            new ClassReader(singleFrameMethodsStream) {}
-          )
-          _ <- ZIO.succeed(classReader.accept(classNode, 0))
-          mNodes = classNode.methods.asScala
-          _ <- ZIO.succeed(mNodes.map(mn => mn.name)).debug
-
-          oneCC <- ControlFlowGraph.cyclomaticComplexity(classNode, "one")
-          twoCC <- ControlFlowGraph.cyclomaticComplexity(classNode, "two")
-          // threeCC <- ControlFlowGraph.cyclomaticComplexity(classNode, "three")
-
-        } yield assertTrue(oneCC.contains(1)) && assertTrue(
-          twoCC.contains(2)
-        ) // && assertTrue(threeCC == Some(3))
-      }
+      ccTripleTest(singleFrameMethodsInfo),
+      ccTripleTest(methodOnBranchInfo)
     )
   )
