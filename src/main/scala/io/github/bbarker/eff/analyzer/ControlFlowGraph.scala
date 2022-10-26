@@ -29,6 +29,10 @@ object ControlFlowGraph {
       val srcFrame: Node[BasicValue] =
         (getFrames()(src)).asInstanceOf[Node[BasicValue]]
       srcFrame.successors.add((getFrames()(dst)).asInstanceOf[Node[BasicValue]])
+      // FIXME: successors aren't being updated correctly when the same src frame is visited more than once
+      println(
+        s"src $src, dst: $dst, src successors: ${srcFrame.successors.size}: ${srcFrame.successors}, srcFrame hash: ${srcFrame.hashCode()}"
+      )
     }
 
   def cyclomaticComplexity(
@@ -54,6 +58,9 @@ object ControlFlowGraph {
   def calculateCyclomaticComplexity(frames: Array[Node[BasicValue]]): Int = {
     @tailrec
     def go(edges: Int, nodes: Int, frameIx: Int): Int =
+      println(
+        s"edges: $edges, nodes: $nodes, frameIx: $frameIx"
+      ) // FIXME: DEBUG
       if (frameIx == frames.length) {
         edges - nodes + 2
       } else if (frames(frameIx) == null) {

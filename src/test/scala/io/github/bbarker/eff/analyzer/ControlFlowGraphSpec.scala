@@ -27,7 +27,7 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
         expectedCC = expectedCC
       )
 
-  def ccTripleTest(
+  def ccMultiMethodTest(
       info: TestClassInfo
   ): Spec[Any, Throwable] =
     test(s"Testing cyclomatic complexity for ${info.name})") {
@@ -87,7 +87,7 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
     )
   def spec = suite("ControlFlowGraphSpec")(
     suite("Cyclomatic Complexity")(
-      ccTripleTest(singleFrameMethodsInfo),
-      ccTripleTest(methodOnBranchInfo)
+      // ccMultiMethodTest(singleFrameMethodsInfo),
+      ccMultiMethodTest(methodOnBranchInfo)
     )
   )
