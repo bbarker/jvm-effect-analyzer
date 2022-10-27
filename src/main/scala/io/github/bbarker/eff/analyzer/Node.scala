@@ -13,18 +13,20 @@ import zio.stream.*
 final case class Node[V <: Value] private (
     var nLocals: Int,
     var nStack: Int,
-    successors: mutable.Set[Node[V]],
-    nodeUUID: UUID = java.util.UUID.randomUUID()
+    successors: mutable.Set[Node[V]]
 ) extends Frame[V](nLocals, nStack):
-  println(s"New Node: ${this.hashCode}")
+
+  /** A fun side-note is that most hashCode functions are based on the object's
+    * identity. Thus the constructors becomes impure when such a hash code is
+    * employed, while the hashCode method itself remains pure.
+    */
+  override def hashCode(): RuntimeFlags = super.hashCode()
 
 object Node {
   def apply[V <: Value](
       nLocals: Int,
       nStack: Int
-  ): Node[V] =
-    println("New Node: apply, hash")
-    Node(nLocals, nStack, mutable.Set.empty)
+  ): Node[V] = Node(nLocals, nStack, mutable.Set.empty)
 
   def fromFrame[V <: Value](
       frame: Frame[V]
@@ -33,7 +35,6 @@ object Node {
       frame.getLocals,
       frame.getMaxStackSize
     ) // TODO: test, not sure this is correct
-    println("New Node: fromFrame")
     node.init(frame)
     node
   }

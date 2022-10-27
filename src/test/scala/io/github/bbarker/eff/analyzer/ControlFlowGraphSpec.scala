@@ -53,10 +53,7 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
       )
     }
 
-  /** Nodes correspond to frames (i.e. method calls), so we need each branch to
-    * call a method if we wish to count that as a node.
-    */
-  class SingleFrameMethods:
+  class MethodsWithoutMethodCalls:
     def one(x: Int): Int = x
     def two(x: Int): Boolean = if (x < 0) then true else false
     def three(x: Int): Boolean =
@@ -67,27 +64,28 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
     def two(x: Int): Boolean = if (x < 0) then aux1(x) else aux2(x)
     def three(x: Int): Boolean =
       if (x < 0) then aux1(x) else if (x == 1) then aux2(x) else aux3(2)
-    def four(x: Int): Boolean =
+    def alsoThree(x: Int): Boolean =
       if (x < 0) then aux1(x) else if (x == 1) then aux1(x) else aux1(2)
 
     def aux1(x: Int): Boolean = if (x > 10) true else false
     def aux2(x: Int): Boolean = if (x > 20) true else false
     def aux3(x: Int): Boolean = if (x > 30) true else false
 
+  // TODO: I think ASM provides a way to get the "path" from a class
   val singleFrameMethodsInfo: TestClassInfo =
     TestClassInfo(
-      "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$SingleFrameMethods",
-      Map("one" -> 1, "two" -> 1, "three" -> 1)
+      "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$MethodsWithoutMethodCalls",
+      Map("one" -> 1, "two" -> 2, "three" -> 3)
     )
 
   val methodOnBranchInfo: TestClassInfo =
     TestClassInfo(
       "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$MethodOnBranch",
-      Map("one" -> 1, "two" -> 2, "three" -> 3, "four" -> 3)
+      Map("one" -> 1, "two" -> 2, "three" -> 3, "alsoThree" -> 3)
     )
   def spec = suite("ControlFlowGraphSpec")(
     suite("Cyclomatic Complexity")(
-      // ccMultiMethodTest(singleFrameMethodsInfo),
+      ccMultiMethodTest(singleFrameMethodsInfo),
       ccMultiMethodTest(methodOnBranchInfo)
     )
   )
