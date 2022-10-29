@@ -3,7 +3,7 @@ package io.github.bbarker.eff.analyzer
 import java.io.InputStream
 import scala.jdk.CollectionConverters.*
 
-import io.github.bbarker.eff.analyzer.util.ClassPath.asmClassPath
+import io.github.bbarker.eff.analyzer.util.ClassPath.*
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.*
 import zio.*
@@ -19,14 +19,14 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
     val name: String = path.split(Array('$', '/')).last
 
   object TestClassInfo:
-    def apply(path: String, expectedCC: Map[String, Int]): TestClassInfo =
+    def apply[T](cls: Class[T], expectedCC: Map[String, Int]): TestClassInfo =
+      val path = asmClassPath(cls)
       TestClassInfo(
         stream =
-          this.getClass.getClassLoader.getResourceAsStream(asmClassPath(path)),
+          this.getClass.getClassLoader.getResourceAsStream(asmClassFile(path)),
         path = path,
         expectedCC = expectedCC
       )
-
   def ccMultiMethodTest(
       info: TestClassInfo
   ): Spec[Any, Throwable] =
@@ -37,8 +37,6 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
           new ClassReader(info.stream) {}
         )
         _ <- ZIO.succeed(classReader.accept(classNode, 0))
-        mNodes = classNode.methods.asScala
-        _ <- ZIO.succeed(mNodes.map(mn => mn.name)).debug
 
         ccOptMap <- ZIO
           .foreach(info.expectedCC.keys)(mn =>
@@ -71,21 +69,20 @@ object ControlFlowGraphSpec extends ZIOSpecDefault:
     def aux2(x: Int): Boolean = if (x > 20) true else false
     def aux3(x: Int): Boolean = if (x > 30) true else false
 
-  // TODO: I think ASM provides a way to get the "path" from a class
-  val singleFrameMethodsInfo: TestClassInfo =
+  val methodsWithoutMethodCallsInfo: TestClassInfo =
     TestClassInfo(
-      "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$MethodsWithoutMethodCalls",
+      classOf[MethodsWithoutMethodCalls],
       Map("one" -> 1, "two" -> 2, "three" -> 3)
     )
 
   val methodOnBranchInfo: TestClassInfo =
     TestClassInfo(
-      "io/github/bbarker/eff/analyzer/ControlFlowGraphSpec$MethodOnBranch",
+      classOf[MethodOnBranch],
       Map("one" -> 1, "two" -> 2, "three" -> 3, "alsoThree" -> 3)
     )
   def spec = suite("ControlFlowGraphSpec")(
     suite("Cyclomatic Complexity")(
-      ccMultiMethodTest(singleFrameMethodsInfo),
+      ccMultiMethodTest(methodsWithoutMethodCallsInfo),
       ccMultiMethodTest(methodOnBranchInfo)
     )
   )

@@ -17,7 +17,7 @@ lazy val root = (project in file("."))
         scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
       )
     ),
-    name := "zio-quickstart",
+    name := "jvm-effect-analyzer",
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio" % zioVersion,
       "dev.zio" %% "zio-streams" % zioVersion,

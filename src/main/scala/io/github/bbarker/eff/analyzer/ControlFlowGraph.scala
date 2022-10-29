@@ -38,6 +38,7 @@ object ControlFlowGraph {
     _ <- ZIO
       .attempt(ccAnalyzer.analyze(owner, mn))
       .refineOrDie[AnalyzerException](Errors.analyzerException _)
+    // Note that `getFrames` is a bit of a misnomer, it is more like `getFrameStates`; see docs
     frames = ccAnalyzer.getFrames.map(_.asInstanceOf[Node[BasicValue]])
     cc = calculateCyclomaticComplexity(frames)
   } yield cc
