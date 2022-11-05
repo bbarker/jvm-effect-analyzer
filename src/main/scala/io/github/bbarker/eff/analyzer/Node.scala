@@ -3,6 +3,7 @@ package io.github.bbarker.eff.analyzer
 import java.util.UUID
 import scala.collection.mutable
 
+import io.github.bbarker.eff.analyzer.CallGraph.*
 import org.objectweb.asm.*
 import org.objectweb.asm.tree.*
 import org.objectweb.asm.tree.analysis.*
@@ -13,6 +14,7 @@ import zio.stream.*
 final case class Node[V <: Value] private (
     var nLocals: Int,
     var nStack: Int,
+    var callGraphNode: Option[CGNode],
     successors: mutable.Set[Node[V]]
 ) extends Frame[V](nLocals, nStack):
 
@@ -26,7 +28,7 @@ object Node {
   def apply[V <: Value](
       nLocals: Int,
       nStack: Int
-  ): Node[V] = Node(nLocals, nStack, mutable.Set.empty)
+  ): Node[V] = Node(nLocals, nStack, None, mutable.Set.empty)
 
   def fromFrame[V <: Value](
       frame: Frame[V]

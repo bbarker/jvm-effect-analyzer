@@ -15,21 +15,31 @@ object CallGraph:
   opaque type JVMPath = String
 
   trait CGNode:
+
+    type Self <: CGNode
     val nodePath: JVMPath
     def callees: Set[JVMPath]
-    def calleeNode(path: JVMPath): Either[CGError, CGNode]
+    def calleeNode(path: JVMPath): Either[CGError, Self]
+    def addChildNode(path: JVMPath, cgNode: Self): Self
 
   final case class CGMapImpl(
       nodePath: JVMPath,
       cgMap: Map[JVMPath, CGMapImpl],
       completed: Boolean
   ) extends CGNode:
+    type Self = CGMapImpl
+
     def callees: Set[JVMPath] = cgMap.keySet
-    def calleeNode(path: JVMPath): Either[CGError, CGNode] = completed match {
-      case true =>
-        cgMap.get(path) match {
-          case None         => Left(PathKeyNotFound)
-          case Some(cgNode) => Right(cgNode)
-        }
-      case false => Left(CGIncomplete)
-    }
+    def calleeNode(path: JVMPath): Either[CGError, CGMapImpl] =
+      completed match {
+        case true =>
+          cgMap.get(path) match {
+            case None         => Left(PathKeyNotFound)
+            case Some(cgNode) => Right(cgNode)
+          }
+        case false =>
+          Left(CGIncomplete)
+      }
+
+    def addChildNode(path: JVMPath, cgNode: CGMapImpl): CGMapImpl =
+      this.copy(cgMap = cgMap + (path -> cgNode))
